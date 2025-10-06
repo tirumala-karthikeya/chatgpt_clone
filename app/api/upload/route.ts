@@ -6,10 +6,32 @@ import File from '@/lib/models/File'
 
 export async function POST(request: NextRequest) {
   try {
+    // Check if Clerk is configured
+    if (!process.env.CLERK_SECRET_KEY) {
+      console.log('Clerk not configured, returning mock upload response')
+      return NextResponse.json({
+        id: 'mock-file-' + Date.now(),
+        url: 'https://via.placeholder.com/300x200?text=Demo+File',
+        fileName: 'demo-file.txt',
+        sizeBytes: 1024
+      })
+    }
+
     const { userId } = auth()
     
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    // Check if MongoDB is configured
+    if (!process.env.MONGODB_URI) {
+      console.log('MongoDB not configured, returning mock upload response')
+      return NextResponse.json({
+        id: 'mock-file-' + Date.now(),
+        url: 'https://via.placeholder.com/300x200?text=Demo+File',
+        fileName: 'demo-file.txt',
+        sizeBytes: 1024
+      })
     }
 
     await connectDB()

@@ -9,10 +9,30 @@ export async function PUT(
   { params }: { params: { id: string } }
 ) {
   try {
+    // Check if Clerk is configured
+    if (!process.env.CLERK_SECRET_KEY) {
+      console.log('Clerk not configured, returning mock conversation')
+      return NextResponse.json({
+        _id: params.id,
+        title: 'Updated Chat',
+        updatedAt: new Date()
+      })
+    }
+
     const { userId } = auth()
     
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    // Check if MongoDB is configured
+    if (!process.env.MONGODB_URI) {
+      console.log('MongoDB not configured, returning mock conversation')
+      return NextResponse.json({
+        _id: params.id,
+        title: 'Updated Chat',
+        updatedAt: new Date()
+      })
     }
 
     await connectDB()
@@ -54,10 +74,22 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
+    // Check if Clerk is configured
+    if (!process.env.CLERK_SECRET_KEY) {
+      console.log('Clerk not configured, returning mock delete response')
+      return NextResponse.json({ message: 'Conversation deleted successfully' })
+    }
+
     const { userId } = auth()
     
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    // Check if MongoDB is configured
+    if (!process.env.MONGODB_URI) {
+      console.log('MongoDB not configured, returning mock delete response')
+      return NextResponse.json({ message: 'Conversation deleted successfully' })
     }
 
     await connectDB()

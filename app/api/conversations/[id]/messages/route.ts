@@ -12,10 +12,40 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
+    // Check if Clerk is configured
+    if (!process.env.CLERK_SECRET_KEY) {
+      console.log('Clerk not configured, returning mock messages')
+      return NextResponse.json([
+        {
+          _id: 'mock-message-1',
+          role: 'assistant',
+          content: 'Hello! I\'m your AI assistant. How can I help you today?',
+          status: 'completed',
+          tokensUsed: 0,
+          createdAt: new Date().toISOString()
+        }
+      ])
+    }
+
     const { userId } = auth()
     
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    // Check if MongoDB is configured
+    if (!process.env.MONGODB_URI) {
+      console.log('MongoDB not configured, returning mock messages')
+      return NextResponse.json([
+        {
+          _id: 'mock-message-1',
+          role: 'assistant',
+          content: 'Hello! I\'m your AI assistant. How can I help you today?',
+          status: 'completed',
+          tokensUsed: 0,
+          createdAt: new Date().toISOString()
+        }
+      ])
     }
 
     await connectDB()
@@ -62,10 +92,44 @@ export async function POST(
   { params }: { params: { id: string } }
 ) {
   try {
+    // Check if Clerk is configured
+    if (!process.env.CLERK_SECRET_KEY) {
+      console.log('Clerk not configured, returning mock response')
+      return NextResponse.json({
+        messageId: 'mock-message-' + Date.now(),
+        status: 'completed',
+        assistantMessage: {
+          id: 'mock-message-' + Date.now(),
+          role: 'assistant',
+          content: 'Hello! I\'m your AI assistant. How can I help you today?',
+          status: 'completed',
+          tokensUsed: 0,
+          createdAt: new Date()
+        }
+      })
+    }
+
     const { userId } = auth()
     
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    // Check if MongoDB is configured
+    if (!process.env.MONGODB_URI) {
+      console.log('MongoDB not configured, returning mock response')
+      return NextResponse.json({
+        messageId: 'mock-message-' + Date.now(),
+        status: 'completed',
+        assistantMessage: {
+          id: 'mock-message-' + Date.now(),
+          role: 'assistant',
+          content: 'Hello! I\'m your AI assistant. How can I help you today?',
+          status: 'completed',
+          tokensUsed: 0,
+          createdAt: new Date()
+        }
+      })
     }
 
     await connectDB()

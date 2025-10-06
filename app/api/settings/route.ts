@@ -7,10 +7,62 @@ import User from '@/lib/models/User'
 
 export async function GET(request: NextRequest) {
   try {
+    // Check if Clerk is configured
+    if (!process.env.CLERK_SECRET_KEY) {
+      console.log('Clerk not configured, returning default settings')
+      return NextResponse.json({
+        theme: 'system',
+        accentColor: 'blue',
+        fontSize: 'medium',
+        chatDensity: 'normal',
+        language: 'en',
+        spokenLanguage: 'auto-detect',
+        defaultModel: 'mistral',
+        temperature: 0.7,
+        maxTokens: 1500,
+        stream: true,
+        systemPrompt: '',
+        notifications: {
+          email: false,
+          summary: false,
+          inApp: true
+        },
+        betaFeatures: false,
+        cacheEnabled: true,
+        apiKey: ''
+      })
+    }
+
     const { userId } = auth()
     
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    // Check if MongoDB is configured
+    if (!process.env.MONGODB_URI) {
+      console.log('MongoDB not configured, returning default settings')
+      return NextResponse.json({
+        theme: 'system',
+        accentColor: 'blue',
+        fontSize: 'medium',
+        chatDensity: 'normal',
+        language: 'en',
+        spokenLanguage: 'auto-detect',
+        defaultModel: 'mistral',
+        temperature: 0.7,
+        maxTokens: 1500,
+        stream: true,
+        systemPrompt: '',
+        notifications: {
+          email: false,
+          summary: false,
+          inApp: true
+        },
+        betaFeatures: false,
+        cacheEnabled: true,
+        apiKey: ''
+      })
     }
 
     await connectDB()
