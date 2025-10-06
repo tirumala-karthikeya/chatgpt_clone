@@ -8,6 +8,9 @@
     "start": "next start",
     "lint": "next lint"
   },
+  "engines": {
+    "node": ">=18"
+  },
   "dependencies": {
     "@clerk/nextjs": "^4.29.1",
     "@radix-ui/react-dialog": "^1.0.5",
@@ -34,7 +37,8 @@
     "rehype-highlight": "^7.0.0",
     "remark-gfm": "^4.0.0",
     "resend": "^6.1.2",
-    "tailwind-merge": "^2.2.0"
+    "tailwind-merge": "^2.2.0",
+    "@netlify/plugin-nextjs": "^5.8.0"
   },
   "devDependencies": {
     "@types/node": "^20.10.5",

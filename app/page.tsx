@@ -13,7 +13,9 @@ interface Chat {
   updatedAt: Date
 }
 
-export default function Home() {
+const clerkEnabled = !!process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
+
+function AuthedHome() {
   const { user, isLoaded } = useUser()
   const [chats, setChats] = useState<Chat[]>([])
   const [currentChatId, setCurrentChatId] = useState('')
@@ -188,4 +190,21 @@ export default function Home() {
       />
     </div>
   )
+}
+
+function PublicHome() {
+  return (
+    <div className="chatgpt-container">
+      <div className="flex items-center justify-center h-screen">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-white mb-4">Welcome to Galaxy.ai</h1>
+          <p className="text-gray-400 mb-8">Sign-in is disabled or not configured. Please add NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY to enable authentication.</p>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+export default function Home() {
+  return clerkEnabled ? <AuthedHome /> : <PublicHome />
 }

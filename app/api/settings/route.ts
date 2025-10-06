@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
 import { auth } from '@clerk/nextjs'
 import connectDB from '@/lib/mongodb'
 import User from '@/lib/models/User'

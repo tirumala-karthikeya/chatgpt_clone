@@ -268,19 +268,19 @@ export default function ChatInterface({ chatId, initialMessages = [] }: ChatInte
   return (
     <div className="chatgpt-main">
       {/* Header */}
-      <div className="border-b border-[#2f2f2f] dark:border-[#2f2f2f] light:border-gray-200 px-6 py-4 flex items-center justify-between bg-[#171717] dark:bg-[#171717] light:bg-white">
+      <div className="border-b border-[#2f2f2f] dark:border-[#2f2f2f] px-6 py-4 flex items-center justify-between bg-[#171717] dark:bg-[#171717]">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 bg-gradient-to-br from-[#10a37f] to-[#0d8a6b] rounded-lg flex items-center justify-center">
             <span className="text-white font-bold text-sm">G</span>
           </div>
           <div>
-            <h1 className="text-lg font-semibold text-white dark:text-white light:text-gray-900">Galaxy.ai</h1>
-            <p className="text-xs text-gray-400 dark:text-gray-400 light:text-gray-500">Powered by AI</p>
+            <h1 className="text-lg font-semibold text-white dark:text-white">Galaxy.ai</h1>
+            <p className="text-xs text-gray-500 dark:text-gray-400">Powered by AI</p>
           </div>
         </div>
         <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2 text-sm text-gray-300 dark:text-gray-300 light:text-gray-600">
-            <span className="px-2 py-1 bg-[#2f2f2f] dark:bg-[#2f2f2f] light:bg-gray-100 rounded text-xs dark:text-gray-300 light:text-gray-600">Free Plan</span>
+          <div className="flex items-center gap-2 text-sm text-gray-300 dark:text-gray-300">
+            <span className="px-2 py-1 bg-[#2f2f2f] dark:bg-[#2f2f2f] rounded text-xs dark:text-gray-300">Free Plan</span>
             <button className="flex items-center gap-1 px-3 py-1.5 bg-gradient-to-r from-purple-600 to-purple-700 text-white text-xs rounded-lg hover:from-purple-700 hover:to-purple-800 transition-all duration-200 shadow-lg">
               <span className="text-sm">💎</span>
               Upgrade to Pro
@@ -298,10 +298,10 @@ export default function ChatInterface({ chatId, initialMessages = [] }: ChatInte
           <div className="flex flex-col items-center justify-center h-full text-center px-6">
             <div className="max-w-4xl w-full">
               <div className="mb-8">
-                <h1 className="text-5xl font-bold text-white dark:text-white light:text-gray-900 mb-4 bg-gradient-to-r from-white to-gray-300 dark:from-white dark:to-gray-300 light:from-gray-900 light:to-gray-600 bg-clip-text text-transparent">
+                <h1 className="text-5xl font-bold text-white dark:text-white mb-4 bg-gradient-to-r from-white to-gray-300 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
                   Welcome to Galaxy.ai
                 </h1>
-                <p className="text-xl text-gray-400 dark:text-gray-400 light:text-gray-500 mb-8">Your intelligent AI assistant for any task</p>
+                <p className="text-xl text-gray-500 dark:text-gray-400 mb-8">Your intelligent AI assistant for any task</p>
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-w-6xl">
@@ -351,14 +351,14 @@ export default function ChatInterface({ chatId, initialMessages = [] }: ChatInte
                 ].map((card, index) => (
                   <div 
                     key={index}
-                    className="p-6 bg-[#2f2f2f] dark:bg-[#2f2f2f] light:bg-gray-50 rounded-xl hover:bg-[#3f3f3f] dark:hover:bg-[#3f3f3f] light:hover:bg-gray-100 cursor-pointer transition-all duration-200 border border-[#4a4a4a] dark:border-[#4a4a4a] light:border-gray-200 hover:border-[#10a37f] group"
+                    className="p-6 bg-[#2f2f2f] dark:bg-[#2f2f2f] rounded-xl hover:bg-[#3f3f3f] dark:hover:bg-[#3f3f3f] cursor-pointer transition-all duration-200 border border-[#4a4a4a] dark:border-[#4a4a4a] hover:border-[#10a37f] group"
                     onClick={() => setInput(card.prompt)}
                   >
                     <div className={`w-12 h-12 bg-gradient-to-br ${card.gradient} rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}>
                       <span className="text-white text-xl">{card.icon}</span>
                     </div>
-                    <h3 className="text-white dark:text-white light:text-gray-900 font-semibold mb-2 text-left">{card.title}</h3>
-                    <p className="text-gray-400 dark:text-gray-400 light:text-gray-500 text-sm text-left">{card.description}</p>
+                    <h3 className="text-white dark:text-white font-semibold mb-2 text-left">{card.title}</h3>
+                    <p className="text-gray-500 dark:text-gray-400 text-sm text-left">{card.description}</p>
                   </div>
                 ))}
               </div>
@@ -399,18 +399,18 @@ export default function ChatInterface({ chatId, initialMessages = [] }: ChatInte
       </div>
 
       {/* Input area */}
-      <div className="chatgpt-input-container bg-[#171717] dark:bg-[#171717] light:bg-white border-t border-[#2f2f2f] dark:border-[#2f2f2f] light:border-gray-200">
+      <div className="chatgpt-input-container bg-[#171717] dark:bg-[#171717] border-t border-[#2f2f2f] dark:border-[#2f2f2f]">
         <div className="max-w-4xl mx-auto w-full px-6 py-4">
           {/* File upload area */}
           {uploadedFiles.length > 0 && (
             <div className="mb-4 flex flex-wrap gap-2">
               {uploadedFiles.map((file, index) => (
-                <div key={index} className="flex items-center gap-2 bg-[#2f2f2f] dark:bg-[#2f2f2f] light:bg-gray-100 px-3 py-2 rounded-lg border border-[#4a4a4a] dark:border-[#4a4a4a] light:border-gray-300 hover:border-[#10a37f] transition-colors">
-                  <Paperclip size={16} className="text-gray-400 dark:text-gray-400 light:text-gray-500" />
-                  <span className="text-sm text-white dark:text-white light:text-gray-900 truncate max-w-32">{file.name}</span>
+                <div key={index} className="flex items-center gap-2 bg-[#2f2f2f] dark:bg-[#2f2f2f] px-3 py-2 rounded-lg border border-[#4a4a4a] dark:border-[#4a4a4a] hover:border-[#10a37f] transition-colors">
+                  <Paperclip size={16} className="text-gray-400 dark:text-gray-400" />
+                  <span className="text-sm text-white dark:text-white truncate max-w-32">{file.name}</span>
                   <button
                     onClick={() => removeFile(index)}
-                    className="text-gray-400 dark:text-gray-400 light:text-gray-500 hover:text-white dark:hover:text-white light:hover:text-gray-900 transition-colors"
+                    className="text-gray-400 dark:text-gray-400 hover:text-white dark:hover:text-white transition-colors"
                   >
                     <X size={16} />
                   </button>
@@ -421,11 +421,11 @@ export default function ChatInterface({ chatId, initialMessages = [] }: ChatInte
 
           {/* Input form */}
           <form onSubmit={handleSendMessage} className="relative">
-            <div className="flex items-center gap-2 bg-[#2f2f2f] dark:bg-[#2f2f2f] light:bg-gray-50 rounded-xl border border-[#4a4a4a] dark:border-[#4a4a4a] light:border-gray-300 focus-within:border-[#10a37f] transition-all duration-200 shadow-lg hover:shadow-xl">
+            <div className="flex items-center gap-2 bg-[#2f2f2f] dark:bg-[#2f2f2f] rounded-xl border border-[#4a4a4a] dark:border-[#4a4a4a] focus-within:border-[#10a37f] transition-all duration-200 shadow-lg hover:shadow-xl">
               <button
                 type="button"
                 onClick={() => document.getElementById('file-upload')?.click()}
-                className="p-3 text-gray-400 dark:text-gray-400 light:text-gray-500 hover:text-[#10a37f] transition-colors hover:bg-[#3f3f3f] dark:hover:bg-[#3f3f3f] light:hover:bg-gray-100 rounded-lg"
+                className="p-3 text-gray-400 dark:text-gray-400 hover:text-[#10a37f] transition-colors hover:bg-[#3f3f3f] dark:hover:bg-[#3f3f3f] rounded-lg"
                 disabled={isUploading}
                 title="Attach files"
               >
@@ -439,7 +439,7 @@ export default function ChatInterface({ chatId, initialMessages = [] }: ChatInte
                   onChange={(e) => setInput(e.target.value)}
                   onKeyDown={handleKeyDown}
                   placeholder="Message Galaxy.ai..."
-                  className="w-full bg-transparent text-white dark:text-white light:text-gray-900 placeholder-gray-400 dark:placeholder-gray-400 light:placeholder-gray-500 resize-none outline-none py-4 text-base"
+                  className="w-full bg-transparent text-white dark:text-white placeholder-gray-400 dark:placeholder-gray-400 resize-none outline-none py-4 text-base"
                   rows={1}
                   style={{
                     height: 'auto',
@@ -453,14 +453,14 @@ export default function ChatInterface({ chatId, initialMessages = [] }: ChatInte
               <div className="flex items-center gap-1 p-2">
                 <button
                   type="button"
-                  className="p-2 text-gray-400 dark:text-gray-400 light:text-gray-500 hover:text-[#10a37f] transition-colors hover:bg-[#3f3f3f] dark:hover:bg-[#3f3f3f] light:hover:bg-gray-100 rounded-lg"
+                  className="p-2 text-gray-400 dark:text-gray-400 hover:text-[#10a37f] transition-colors hover:bg-[#3f3f3f] dark:hover:bg-[#3f3f3f] rounded-lg"
                   title="Voice input"
                 >
                   <Mic size={20} />
                 </button>
                 <button
                   type="button"
-                  className="p-2 text-gray-400 dark:text-gray-400 light:text-gray-500 hover:text-[#10a37f] transition-colors hover:bg-[#3f3f3f] dark:hover:bg-[#3f3f3f] light:hover:bg-gray-100 rounded-lg"
+                  className="p-2 text-gray-400 dark:text-gray-400 hover:text-[#10a37f] transition-colors hover:bg-[#3f3f3f] dark:hover:bg-[#3f3f3f] rounded-lg"
                   title="Voice output"
                 >
                   <Volume2 size={20} />

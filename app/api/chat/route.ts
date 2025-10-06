@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs'
-import { openai } from '@ai-sdk/openai'
-import { streamText } from 'ai'
+import OpenAI from 'openai'
 
 export async function POST(req: NextRequest) {
   try {
@@ -17,15 +16,15 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Invalid messages' }, { status: 400 })
     }
 
-    // Initialize OpenAI (you'll need to set OPENAI_API_KEY in your environment)
-    const result = await streamText({
-      model: openai('gpt-4-turbo-preview'),
+    const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
+    const completion = await client.chat.completions.create({
+      model: 'gpt-4o-mini',
       messages,
       temperature: 0.7,
-      maxTokens: 4000,
+      max_tokens: 4000
     })
 
-    return result.toDataStreamResponse()
+    return NextResponse.json(completion)
   } catch (error) {
     console.error('Chat API error:', error)
     return NextResponse.json(
