@@ -6,6 +6,22 @@ import User from '@/lib/models/User'
 
 export async function GET(request: NextRequest) {
   try {
+    // Check if Clerk is configured
+    if (!process.env.CLERK_SECRET_KEY) {
+      console.log('Clerk not configured, returning mock conversations')
+      return NextResponse.json({ 
+        conversations: [
+          {
+            _id: 'mock-chat-1',
+            title: 'Welcome to Galaxy.ai',
+            createdAt: new Date(),
+            updatedAt: new Date()
+          }
+        ],
+        pagination: { page: 1, limit: 20, total: 1, pages: 1 }
+      })
+    }
+
     const { userId } = auth()
     
     if (!userId) {
@@ -14,6 +30,23 @@ export async function GET(request: NextRequest) {
     }
 
     console.log('User ID from Clerk:', userId)
+    
+    // Check if MongoDB is configured
+    if (!process.env.MONGODB_URI) {
+      console.log('MongoDB not configured, returning mock conversations')
+      return NextResponse.json({ 
+        conversations: [
+          {
+            _id: 'mock-chat-1',
+            title: 'Welcome to Galaxy.ai',
+            createdAt: new Date(),
+            updatedAt: new Date()
+          }
+        ],
+        pagination: { page: 1, limit: 20, total: 1, pages: 1 }
+      })
+    }
+    
     await connectDB()
 
     // Find the user by clerkId first
@@ -54,10 +87,32 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    // Check if Clerk is configured
+    if (!process.env.CLERK_SECRET_KEY) {
+      console.log('Clerk not configured, returning mock conversation')
+      return NextResponse.json({
+        _id: 'mock-chat-' + Date.now(),
+        title: 'New Chat',
+        createdAt: new Date(),
+        updatedAt: new Date()
+      })
+    }
+
     const { userId } = auth()
     
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    // Check if MongoDB is configured
+    if (!process.env.MONGODB_URI) {
+      console.log('MongoDB not configured, returning mock conversation')
+      return NextResponse.json({
+        _id: 'mock-chat-' + Date.now(),
+        title: 'New Chat',
+        createdAt: new Date(),
+        updatedAt: new Date()
+      })
     }
 
     await connectDB()

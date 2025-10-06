@@ -7,6 +7,18 @@ import { setCache } from '@/lib/redis'
 
 export async function POST(request: NextRequest) {
   try {
+    // Check if Clerk is configured
+    if (!process.env.CLERK_SECRET_KEY) {
+      console.log('Clerk not configured, returning mock user')
+      return NextResponse.json({ 
+        _id: 'mock-user-id',
+        clerkId: 'mock-clerk-id',
+        email: 'demo@example.com',
+        name: 'Demo User',
+        role: 'user'
+      })
+    }
+
     const { userId } = auth()
     
     if (!userId) {
@@ -15,6 +27,19 @@ export async function POST(request: NextRequest) {
     }
 
     console.log('Creating user for Clerk ID:', userId)
+    
+    // Check if MongoDB is configured
+    if (!process.env.MONGODB_URI) {
+      console.log('MongoDB not configured, returning mock user')
+      return NextResponse.json({ 
+        _id: 'mock-user-id',
+        clerkId: userId,
+        email: 'demo@example.com',
+        name: 'Demo User',
+        role: 'user'
+      })
+    }
+    
     await connectDB()
 
     // Check if user already exists

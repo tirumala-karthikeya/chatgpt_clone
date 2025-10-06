@@ -13,7 +13,8 @@ interface Chat {
   updatedAt: Date
 }
 
-const clerkEnabled = !!process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
+// Check if Clerk is enabled - this will be determined at runtime
+const clerkEnabled = typeof window !== 'undefined' && !!process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
 
 function AuthedHome() {
   const { user, isLoaded } = useUser()
@@ -206,5 +207,21 @@ function PublicHome() {
 }
 
 export default function Home() {
+  const [isClient, setIsClient] = useState(false)
+  
+  useEffect(() => {
+    setIsClient(true)
+  }, [])
+  
+  if (!isClient) {
+    return (
+      <div className="chatgpt-container">
+        <div className="flex items-center justify-center h-screen">
+          <div className="text-white">Loading...</div>
+        </div>
+      </div>
+    )
+  }
+  
   return clerkEnabled ? <AuthedHome /> : <PublicHome />
 }
