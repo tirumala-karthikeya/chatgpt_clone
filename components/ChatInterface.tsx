@@ -1,7 +1,8 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
-import { Send, Paperclip, X, RotateCcw, Copy, ThumbsUp, ThumbsDown, ChevronDown, Settings, MoreHorizontal, Plus, Mic, Volume2 } from 'lucide-react'
+import { Send, Paperclip, X, RotateCcw, Copy, ThumbsUp, ThumbsDown, ChevronDown, Plus, Mic, Volume2 } from 'lucide-react'
+import { UserButton } from '@clerk/nextjs'
 import MessageBubble from './MessageBubble'
 import FileUpload from './FileUpload'
 
@@ -104,17 +105,34 @@ export default function ChatInterface({ chatId, initialMessages = [] }: ChatInte
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
 
-  // Update messages when chatId changes
+  // Fetch messages when chatId changes
   useEffect(() => {
     if (chatId) {
-      setMessages(getMockMessages(chatId))
+      fetchMessages()
     }
   }, [chatId])
+
+  const fetchMessages = async () => {
+    try {
+      const response = await fetch(`/api/conversations/${chatId}/messages`)
+      if (response.ok) {
+        const messages = await response.json()
+        setMessages(messages)
+      }
+    } catch (error) {
+      console.error('Error fetching messages:', error)
+    }
+  }
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault()
     
     if (!input.trim() && uploadedFiles.length === 0) return
+
+    if (!chatId) {
+      console.error('No chat selected. Please create a new chat first.')
+      return
+    }
 
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -129,27 +147,76 @@ export default function ChatInterface({ chatId, initialMessages = [] }: ChatInte
     setUploadedFiles([])
     setIsGenerating(true)
 
-    // Demo AI responses
-    const demoResponses = [
-      "I'm a ChatGPT clone built with Next.js, TypeScript, and TailwindCSS. This is a pixel-perfect UI replica of ChatGPT with all the visual elements you'd expect!",
-      "The interface includes features like message streaming, file uploads, chat history, and a responsive design that works on both desktop and mobile devices.",
-      "This is a demo version showing the complete ChatGPT UI/UX without backend integration. The design matches ChatGPT's exact styling, colors, and interactions.",
-      "You can see features like message editing, regeneration, copy functionality, and the familiar sidebar with chat history - all built with modern React and TypeScript.",
-      "The project demonstrates engineering excellence with clean architecture, modular components, and production-ready code structure."
-    ]
+    try {
+      console.log('Sending message to chatId:', chatId)
+      console.log('Input content:', input)
+      console.log('Input length:', input.length)
+      
+      const response = await fetch(`/api/conversations/${chatId}/messages`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          content: input,
+          stream: true
+        })
+      })
 
-    // Simulate AI response
-    setTimeout(() => {
-      const randomResponse = demoResponses[Math.floor(Math.random() * demoResponses.length)]
-      const aiMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        role: 'assistant',
-        content: randomResponse,
-        createdAt: new Date()
+      if (response.ok) {
+        const reader = response.body?.getReader()
+        const decoder = new TextDecoder()
+        let aiContent = ''
+
+        const aiMessage: Message = {
+          id: (Date.now() + 1).toString(),
+          role: 'assistant',
+          content: '',
+          createdAt: new Date()
+        }
+
+        setMessages(prev => [...prev, aiMessage])
+
+        if (reader) {
+          while (true) {
+            const { done, value } = await reader.read()
+            if (done) break
+
+            const chunk = decoder.decode(value)
+            const lines = chunk.split('\n')
+
+            for (const line of lines) {
+              if (line.startsWith('data: ')) {
+                const data = line.slice(6)
+                if (data === '[DONE]') {
+                  setIsGenerating(false)
+                  return
+                }
+
+                try {
+                  const parsed = JSON.parse(data)
+                  if (parsed.content) {
+                    aiContent += parsed.content
+                    setMessages(prev => 
+                      prev.map(msg => 
+                        msg.id === aiMessage.id 
+                          ? { ...msg, content: aiContent }
+                          : msg
+                      )
+                    )
+                  }
+                } catch (e) {
+                  // Ignore parsing errors
+                }
+              }
+            }
+          }
+        }
       }
-      setMessages(prev => [...prev, aiMessage])
+    } catch (error) {
+      console.error('Error sending message:', error)
       setIsGenerating(false)
-    }, 1500)
+    }
   }
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -201,26 +268,26 @@ export default function ChatInterface({ chatId, initialMessages = [] }: ChatInte
   return (
     <div className="chatgpt-main">
       {/* Header */}
-      <div className="border-b border-[#2f2f2f] px-4 py-3 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <h1 className="text-lg font-semibold text-white">ChatGPT</h1>
-          <ChevronDown size={16} className="text-gray-400" />
+      <div className="border-b border-[#2f2f2f] dark:border-[#2f2f2f] light:border-gray-200 px-6 py-4 flex items-center justify-between bg-[#171717] dark:bg-[#171717] light:bg-white">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 bg-gradient-to-br from-[#10a37f] to-[#0d8a6b] rounded-lg flex items-center justify-center">
+            <span className="text-white font-bold text-sm">G</span>
+          </div>
+          <div>
+            <h1 className="text-lg font-semibold text-white dark:text-white light:text-gray-900">Galaxy.ai</h1>
+            <p className="text-xs text-gray-400 dark:text-gray-400 light:text-gray-500">Powered by AI</p>
+          </div>
         </div>
         <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2 text-sm text-gray-300">
-            <span>Saved memory full</span>
-            <button className="flex items-center gap-1 px-3 py-1 bg-purple-600 text-white text-xs rounded hover:bg-purple-700 transition-colors">
-              <span>💎</span>
-              Upgrade to Go
+          <div className="flex items-center gap-2 text-sm text-gray-300 dark:text-gray-300 light:text-gray-600">
+            <span className="px-2 py-1 bg-[#2f2f2f] dark:bg-[#2f2f2f] light:bg-gray-100 rounded text-xs dark:text-gray-300 light:text-gray-600">Free Plan</span>
+            <button className="flex items-center gap-1 px-3 py-1.5 bg-gradient-to-r from-purple-600 to-purple-700 text-white text-xs rounded-lg hover:from-purple-700 hover:to-purple-800 transition-all duration-200 shadow-lg">
+              <span className="text-sm">💎</span>
+              Upgrade to Pro
             </button>
           </div>
           <div className="flex items-center gap-2">
-            <button className="p-2 hover:bg-[#2f2f2f] rounded transition-colors">
-              <Settings size={16} className="text-gray-400" />
-            </button>
-            <button className="p-2 hover:bg-[#2f2f2f] rounded transition-colors">
-              <MoreHorizontal size={16} className="text-gray-400" />
-            </button>
+            <UserButton />
           </div>
         </div>
       </div>
@@ -228,28 +295,72 @@ export default function ChatInterface({ chatId, initialMessages = [] }: ChatInte
       {/* Messages area */}
       <div className="chatgpt-messages">
         {messages.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-full text-center px-4">
-            <div className="max-w-2xl">
-              <h1 className="text-4xl font-bold text-white mb-4">
-                What's on the agenda today?
-              </h1>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-4xl">
-                <div className="p-4 bg-[#2f2f2f] rounded-lg hover:bg-[#3f3f3f] cursor-pointer transition-colors">
-                  <h3 className="text-white font-semibold mb-2">Explain quantum computing</h3>
-                  <p className="text-gray-400 text-sm">Simple explanations of complex topics</p>
-                </div>
-                <div className="p-4 bg-[#2f2f2f] rounded-lg hover:bg-[#3f3f3f] cursor-pointer transition-colors">
-                  <h3 className="text-white font-semibold mb-2">Write a creative story</h3>
-                  <p className="text-gray-400 text-sm">Creative writing and storytelling</p>
-                </div>
-                <div className="p-4 bg-[#2f2f2f] rounded-lg hover:bg-[#3f3f3f] cursor-pointer transition-colors">
-                  <h3 className="text-white font-semibold mb-2">Plan a trip to Japan</h3>
-                  <p className="text-gray-400 text-sm">Travel planning and recommendations</p>
-                </div>
-                <div className="p-4 bg-[#2f2f2f] rounded-lg hover:bg-[#3f3f3f] cursor-pointer transition-colors">
-                  <h3 className="text-white font-semibold mb-2">Help with coding</h3>
-                  <p className="text-gray-400 text-sm">Programming and technical assistance</p>
-                </div>
+          <div className="flex flex-col items-center justify-center h-full text-center px-6">
+            <div className="max-w-4xl w-full">
+              <div className="mb-8">
+                <h1 className="text-5xl font-bold text-white dark:text-white light:text-gray-900 mb-4 bg-gradient-to-r from-white to-gray-300 dark:from-white dark:to-gray-300 light:from-gray-900 light:to-gray-600 bg-clip-text text-transparent">
+                  Welcome to Galaxy.ai
+                </h1>
+                <p className="text-xl text-gray-400 dark:text-gray-400 light:text-gray-500 mb-8">Your intelligent AI assistant for any task</p>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-w-6xl">
+                {[
+                  { 
+                    title: "Explain quantum computing", 
+                    description: "Simple explanations of complex topics", 
+                    icon: "⚛️", 
+                    gradient: "from-blue-500 to-purple-600",
+                    prompt: "Explain quantum computing in simple terms"
+                  },
+                  { 
+                    title: "Write a creative story", 
+                    description: "Creative writing and storytelling", 
+                    icon: "✍️", 
+                    gradient: "from-green-500 to-teal-600",
+                    prompt: "Write a creative story about AI and humans working together"
+                  },
+                  { 
+                    title: "Plan a trip to Japan", 
+                    description: "Travel planning and recommendations", 
+                    icon: "✈️", 
+                    gradient: "from-orange-500 to-red-600",
+                    prompt: "Help me plan a 10-day trip to Japan"
+                  },
+                  { 
+                    title: "Help with coding", 
+                    description: "Programming and technical assistance", 
+                    icon: "💻", 
+                    gradient: "from-purple-500 to-pink-600",
+                    prompt: "I'm having trouble with React hooks. Can you help me understand useState and useEffect?"
+                  },
+                  { 
+                    title: "Business planning", 
+                    description: "Strategic planning and analysis", 
+                    icon: "💼", 
+                    gradient: "from-yellow-500 to-orange-600",
+                    prompt: "Create a business plan for a tech startup"
+                  },
+                  { 
+                    title: "Language learning", 
+                    description: "Educational support and tutoring", 
+                    icon: "🌍", 
+                    gradient: "from-indigo-500 to-blue-600",
+                    prompt: "Help me learn a new language"
+                  }
+                ].map((card, index) => (
+                  <div 
+                    key={index}
+                    className="p-6 bg-[#2f2f2f] dark:bg-[#2f2f2f] light:bg-gray-50 rounded-xl hover:bg-[#3f3f3f] dark:hover:bg-[#3f3f3f] light:hover:bg-gray-100 cursor-pointer transition-all duration-200 border border-[#4a4a4a] dark:border-[#4a4a4a] light:border-gray-200 hover:border-[#10a37f] group"
+                    onClick={() => setInput(card.prompt)}
+                  >
+                    <div className={`w-12 h-12 bg-gradient-to-br ${card.gradient} rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}>
+                      <span className="text-white text-xl">{card.icon}</span>
+                    </div>
+                    <h3 className="text-white dark:text-white light:text-gray-900 font-semibold mb-2 text-left">{card.title}</h3>
+                    <p className="text-gray-400 dark:text-gray-400 light:text-gray-500 text-sm text-left">{card.description}</p>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
@@ -288,18 +399,18 @@ export default function ChatInterface({ chatId, initialMessages = [] }: ChatInte
       </div>
 
       {/* Input area */}
-      <div className="chatgpt-input-container">
-        <div className="max-w-4xl mx-auto w-full">
+      <div className="chatgpt-input-container bg-[#171717] dark:bg-[#171717] light:bg-white border-t border-[#2f2f2f] dark:border-[#2f2f2f] light:border-gray-200">
+        <div className="max-w-4xl mx-auto w-full px-6 py-4">
           {/* File upload area */}
           {uploadedFiles.length > 0 && (
             <div className="mb-4 flex flex-wrap gap-2">
               {uploadedFiles.map((file, index) => (
-                <div key={index} className="flex items-center gap-2 bg-[#2f2f2f] px-3 py-2 rounded-lg">
-                  <Paperclip size={16} className="text-gray-400" />
-                  <span className="text-sm text-white truncate max-w-32">{file.name}</span>
+                <div key={index} className="flex items-center gap-2 bg-[#2f2f2f] dark:bg-[#2f2f2f] light:bg-gray-100 px-3 py-2 rounded-lg border border-[#4a4a4a] dark:border-[#4a4a4a] light:border-gray-300 hover:border-[#10a37f] transition-colors">
+                  <Paperclip size={16} className="text-gray-400 dark:text-gray-400 light:text-gray-500" />
+                  <span className="text-sm text-white dark:text-white light:text-gray-900 truncate max-w-32">{file.name}</span>
                   <button
                     onClick={() => removeFile(index)}
-                    className="text-gray-400 hover:text-white"
+                    className="text-gray-400 dark:text-gray-400 light:text-gray-500 hover:text-white dark:hover:text-white light:hover:text-gray-900 transition-colors"
                   >
                     <X size={16} />
                   </button>
@@ -310,12 +421,13 @@ export default function ChatInterface({ chatId, initialMessages = [] }: ChatInte
 
           {/* Input form */}
           <form onSubmit={handleSendMessage} className="relative">
-            <div className="flex items-center gap-2 bg-[#2f2f2f] rounded-lg border border-[#4a4a4a] focus-within:border-[#10a37f] transition-colors">
+            <div className="flex items-center gap-2 bg-[#2f2f2f] dark:bg-[#2f2f2f] light:bg-gray-50 rounded-xl border border-[#4a4a4a] dark:border-[#4a4a4a] light:border-gray-300 focus-within:border-[#10a37f] transition-all duration-200 shadow-lg hover:shadow-xl">
               <button
                 type="button"
                 onClick={() => document.getElementById('file-upload')?.click()}
-                className="p-3 text-gray-400 hover:text-white transition-colors"
+                className="p-3 text-gray-400 dark:text-gray-400 light:text-gray-500 hover:text-[#10a37f] transition-colors hover:bg-[#3f3f3f] dark:hover:bg-[#3f3f3f] light:hover:bg-gray-100 rounded-lg"
                 disabled={isUploading}
+                title="Attach files"
               >
                 <Plus size={20} />
               </button>
@@ -326,8 +438,8 @@ export default function ChatInterface({ chatId, initialMessages = [] }: ChatInte
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   onKeyDown={handleKeyDown}
-                  placeholder="Ask anything"
-                  className="w-full bg-transparent text-white placeholder-gray-400 resize-none outline-none py-3"
+                  placeholder="Message Galaxy.ai..."
+                  className="w-full bg-transparent text-white dark:text-white light:text-gray-900 placeholder-gray-400 dark:placeholder-gray-400 light:placeholder-gray-500 resize-none outline-none py-4 text-base"
                   rows={1}
                   style={{
                     height: 'auto',
@@ -338,18 +450,28 @@ export default function ChatInterface({ chatId, initialMessages = [] }: ChatInte
                 />
               </div>
               
-              <div className="flex items-center gap-2 p-3">
+              <div className="flex items-center gap-1 p-2">
                 <button
                   type="button"
-                  className="p-2 text-gray-400 hover:text-white transition-colors"
+                  className="p-2 text-gray-400 dark:text-gray-400 light:text-gray-500 hover:text-[#10a37f] transition-colors hover:bg-[#3f3f3f] dark:hover:bg-[#3f3f3f] light:hover:bg-gray-100 rounded-lg"
+                  title="Voice input"
                 >
                   <Mic size={20} />
                 </button>
                 <button
                   type="button"
-                  className="p-2 text-gray-400 hover:text-white transition-colors"
+                  className="p-2 text-gray-400 dark:text-gray-400 light:text-gray-500 hover:text-[#10a37f] transition-colors hover:bg-[#3f3f3f] dark:hover:bg-[#3f3f3f] light:hover:bg-gray-100 rounded-lg"
+                  title="Voice output"
                 >
                   <Volume2 size={20} />
+                </button>
+                <button
+                  type="submit"
+                  disabled={!input.trim() || isGenerating}
+                  className="p-2 bg-[#10a37f] text-white rounded-lg hover:bg-[#0d8a6b] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  title="Send message"
+                >
+                  <Send size={20} />
                 </button>
               </div>
               
@@ -367,9 +489,16 @@ export default function ChatInterface({ chatId, initialMessages = [] }: ChatInte
             </div>
           </form>
           
-          <p className="text-xs text-gray-500 mt-2 text-center">
-            ChatGPT can make mistakes. Consider checking important information.
-          </p>
+          <div className="flex items-center justify-between mt-3">
+            <p className="text-xs text-gray-500 dark:text-gray-500 light:text-gray-400">
+              Galaxy.ai can make mistakes. Consider checking important information.
+            </p>
+            <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-500 light:text-gray-400">
+              <span>Press Enter to send</span>
+              <span>•</span>
+              <span>Shift + Enter for new line</span>
+            </div>
+          </div>
         </div>
       </div>
     </div>

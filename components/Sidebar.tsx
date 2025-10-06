@@ -1,32 +1,23 @@
 'use client'
 
 import { useState } from 'react'
+import { useUser } from '@clerk/nextjs'
 import { 
   Plus, 
-  MessageSquare, 
   Settings, 
   User, 
   Menu, 
-  X,
   Edit3,
   Trash2,
-  Search,
-  BookOpen,
-  Folder,
-  Grid3X3,
   ChevronDown,
-  Star,
   HelpCircle,
   LogOut,
   Sparkles,
-  Clock,
-  Shield,
-  Database,
-  Users
+  Clock
 } from 'lucide-react'
 
 interface Chat {
-  id: string
+  _id: string
   title: string
   createdAt: Date
   updatedAt: Date
@@ -51,6 +42,7 @@ export default function Sidebar({
   onRenameChat,
   onOpenSettings
 }: SidebarProps) {
+  const { user } = useUser()
   const [isMobileOpen, setIsMobileOpen] = useState(false)
   const [editingChat, setEditingChat] = useState<string | null>(null)
   const [editingTitle, setEditingTitle] = useState('')
@@ -100,60 +92,6 @@ export default function Sidebar({
               </button>
             </div>
 
-            {/* Search Chats */}
-            <div className="px-4 pb-4">
-              <button className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-[#2f2f2f] text-gray-300 transition-colors">
-                <Search size={20} />
-                <span>Search chats</span>
-              </button>
-            </div>
-
-            {/* Library */}
-            <div className="px-4 pb-4">
-              <button className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-[#2f2f2f] text-gray-300 transition-colors">
-                <BookOpen size={20} />
-                <span>Library</span>
-              </button>
-            </div>
-
-            {/* Projects */}
-            <div className="px-4 pb-4">
-              <button className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-[#2f2f2f] text-gray-300 transition-colors">
-                <Folder size={20} />
-                <span>Projects</span>
-              </button>
-            </div>
-
-            {/* GPTs Section */}
-            <div className="px-4 pb-2">
-              <h3 className="text-sm font-semibold text-gray-400 mb-2">GPTs</h3>
-              <button className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-[#2f2f2f] text-gray-300 transition-colors">
-                <Grid3X3 size={20} />
-                <span>Explore</span>
-              </button>
-            </div>
-
-            {/* GPT List */}
-            <div className="px-4 pb-4 space-y-1">
-              <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-[#2f2f2f] text-gray-300 transition-colors cursor-pointer">
-                <div className="w-6 h-6 bg-red-500 rounded flex items-center justify-center">
-                  <span className="text-xs text-white font-bold">AI</span>
-                </div>
-                <span className="text-sm">AI PDF Drive: Chat, Create, ...</span>
-              </div>
-              <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-[#2f2f2f] text-gray-300 transition-colors cursor-pointer">
-                <div className="w-6 h-6 bg-red-500 rounded flex items-center justify-center">
-                  <Star size={14} className="text-white" />
-                </div>
-                <span className="text-sm">Tarot Reading</span>
-              </div>
-              <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-[#2f2f2f] text-gray-300 transition-colors cursor-pointer">
-                <div className="w-6 h-6 bg-green-500 rounded flex items-center justify-center">
-                  <span className="text-xs text-white">🌿</span>
-                </div>
-                <span className="text-sm">image generator</span>
-              </div>
-            </div>
 
             {/* Chats Section */}
             <div className="px-4 pb-2">
@@ -167,15 +105,15 @@ export default function Sidebar({
                   .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
                   .map((chat) => (
                   <div
-                    key={chat.id}
-                    className={`group relative flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-colors ${
-                      currentChatId === chat.id
-                        ? 'bg-[#2f2f2f] text-white'
-                        : 'hover:bg-[#2f2f2f] text-gray-300'
-                    }`}
-                    onClick={() => onSelectChat?.(chat.id)}
+                    key={chat._id}
+                  className={`group relative flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-colors ${
+                    currentChatId === chat._id
+                      ? 'bg-[#2f2f2f] text-white'
+                      : 'hover:bg-[#2f2f2f] text-gray-300'
+                  }`}
+                  onClick={() => onSelectChat?.(chat._id)}
                   >
-                    {editingChat === chat.id ? (
+                    {editingChat === chat._id ? (
                       <input
                         type="text"
                         value={editingTitle}
@@ -194,29 +132,29 @@ export default function Sidebar({
                       </span>
                     )}
 
-                    {/* Action buttons */}
-                    {currentChatId === chat.id && (
-                      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            handleRename(chat.id, chat.title)
-                          }}
-                          className="p-1 hover:bg-[#4a4a4a] rounded"
-                        >
-                          <Edit3 size={14} />
-                        </button>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            onDeleteChat?.(chat.id)
-                          }}
-                          className="p-1 hover:bg-[#4a4a4a] rounded text-red-400"
-                        >
-                          <Trash2 size={14} />
-                        </button>
-                      </div>
-                    )}
+                  {/* Action buttons */}
+                  {currentChatId === chat._id && (
+                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          handleRename(chat._id, chat.title)
+                        }}
+                        className="p-1 hover:bg-[#4a4a4a] rounded"
+                      >
+                        <Edit3 size={14} />
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          onDeleteChat?.(chat._id)
+                        }}
+                        className="p-1 hover:bg-[#4a4a4a] rounded text-red-400"
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+                  )}
                   </div>
                 ))}
               </div>
@@ -234,7 +172,7 @@ export default function Sidebar({
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-white truncate">
-                  J.T karthikeya
+                  {user?.fullName || user?.emailAddresses[0]?.emailAddress}
                 </p>
                 <p className="text-xs text-gray-400 truncate">
                   Free
@@ -252,7 +190,7 @@ export default function Sidebar({
                 <div className="p-2">
                   <div className="flex items-center gap-3 p-2 text-sm text-gray-300">
                     <User size={16} />
-                    j.karthikeya2004@gmail.com
+                    {user?.emailAddresses[0]?.emailAddress}
                   </div>
                   
                   <div className="border-t border-[#4a4a4a] my-2"></div>

@@ -20,7 +20,7 @@ interface Message {
   id: string
   role: 'user' | 'assistant'
   content: string
-  createdAt: Date
+  createdAt: Date | string
   files?: File[]
   isStreaming?: boolean
 }
@@ -62,8 +62,17 @@ export default function MessageBubble({
     if (liked) setLiked(false)
   }
 
-  const formatTime = (date: Date) => {
-    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+  const formatTime = (date: Date | string | undefined) => {
+    if (!date) return 'Just now'
+    
+    const dateObj = date instanceof Date ? date : new Date(date)
+    
+    // Check if the date is valid
+    if (isNaN(dateObj.getTime())) {
+      return 'Just now'
+    }
+    
+    return dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
   }
 
   return (
@@ -118,14 +127,14 @@ export default function MessageBubble({
                 <ReactMarkdown
                   remarkPlugins={[remarkGfm]}
                   components={{
-                    code({ node, inline, className, children, ...props }) {
+                    code({ node, className, children, ...props }: any) {
                       const match = /language-(\w+)/.exec(className || '')
+                      const inline = props.inline
                       return !inline && match ? (
                         <SyntaxHighlighter
-                          style={vscDarkPlus}
                           language={match[1]}
                           PreTag="div"
-                          className="rounded-lg"
+                          className="rounded-lg bg-[#1e1e1e] text-gray-100"
                           {...props}
                         >
                           {String(children).replace(/\n$/, '')}

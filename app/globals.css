@@ -47,6 +47,28 @@
     --input: 240 3.7% 15.9%;
     --ring: 240 4.9% 83.9%;
   }
+
+  .light {
+    --background: 0 0% 100%;
+    --foreground: 240 10% 3.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 3.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 3.9%;
+    --primary: 240 5.9% 10%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 240 4.8% 95.9%;
+    --secondary-foreground: 240 5.9% 10%;
+    --muted: 240 4.8% 95.9%;
+    --muted-foreground: 240 3.8% 46.1%;
+    --accent: 240 4.8% 95.9%;
+    --accent-foreground: 240 5.9% 10%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 5.9% 90%;
+    --input: 240 5.9% 90%;
+    --ring: 240 5.9% 10%;
+  }
 }
 
 @layer base {
@@ -55,6 +77,12 @@
   }
   body {
     @apply bg-background text-foreground;
+    margin: 0;
+    padding: 0;
+  }
+  html {
+    margin: 0;
+    padding: 0;
   }
 }
 
@@ -82,6 +110,25 @@
   background: #212121;
   position: relative;
   min-width: 0;
+}
+
+/* Light mode styles */
+.light .chatgpt-sidebar {
+  background: #f8f9fa;
+  border-right: 1px solid #e5e7eb;
+}
+
+.light .chatgpt-main {
+  background: #ffffff;
+}
+
+.light .chatgpt-messages {
+  background: #ffffff;
+}
+
+.light .chatgpt-input-container {
+  background: #ffffff;
+  border-top: 1px solid #e5e7eb;
 }
 
 .chatgpt-messages {
@@ -123,6 +170,22 @@
   color: #8e8ea0;
 }
 
+/* Light mode input styles */
+.light .chatgpt-input {
+  background: #f8f9fa;
+  border: 1px solid #d1d5db;
+  color: #1f2937;
+}
+
+.light .chatgpt-input:focus {
+  border-color: #10a37f;
+  box-shadow: 0 0 0 2px rgba(16, 163, 127, 0.2);
+}
+
+.light .chatgpt-input::placeholder {
+  color: #6b7280;
+}
+
 .chatgpt-message {
   padding: 1.5rem 0;
   border-bottom: 1px solid #2f2f2f;
@@ -138,6 +201,19 @@
 
 .chatgpt-message-assistant {
   background: #171717;
+}
+
+/* Light mode message styles */
+.light .chatgpt-message {
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.light .chatgpt-message-user {
+  background: #ffffff;
+}
+
+.light .chatgpt-message-assistant {
+  background: #f8f9fa;
 }
 
 .chatgpt-avatar {
@@ -166,6 +242,11 @@
   margin-left: 1rem;
   line-height: 1.6;
   color: #ffffff;
+}
+
+/* Light mode content styles */
+.light .chatgpt-content {
+  color: #1f2937;
 }
 
 .chatgpt-typing {

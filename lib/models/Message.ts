@@ -4,13 +4,9 @@ export interface IMessage extends Document {
   chatId: mongoose.Types.ObjectId
   role: 'user' | 'assistant' | 'system'
   content: string
-  isEdited: boolean
-  parentMessageId?: mongoose.Types.ObjectId
-  metadata: {
-    tokens: number
-    model: string
-    finishReason?: string
-  }
+  tokensUsed: number
+  status: 'pending' | 'streaming' | 'completed' | 'failed'
+  metadata: Record<string, any>
   files: Array<{
     id: string
     name: string
@@ -38,27 +34,18 @@ const MessageSchema = new Schema<IMessage>({
     type: String,
     required: true
   },
-  isEdited: {
-    type: Boolean,
-    default: false
+  tokensUsed: {
+    type: Number,
+    default: 0
   },
-  parentMessageId: {
-    type: Schema.Types.ObjectId,
-    ref: 'Message'
+  status: {
+    type: String,
+    enum: ['pending', 'streaming', 'completed', 'failed'],
+    default: 'completed'
   },
   metadata: {
-    tokens: {
-      type: Number,
-      default: 0
-    },
-    model: {
-      type: String,
-      default: 'gpt-4-turbo-preview'
-    },
-    finishReason: {
-      type: String,
-      enum: ['stop', 'length', 'content_filter', 'function_call']
-    }
+    type: Schema.Types.Mixed,
+    default: {}
   },
   files: [{
     id: {

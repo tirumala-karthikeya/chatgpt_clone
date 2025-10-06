@@ -279,3 +279,6 @@ k8s/
 
 # Monitoring and analytics
 .sentryclirc
+
+# Sentry Config File
+.env.sentry-build-plugin

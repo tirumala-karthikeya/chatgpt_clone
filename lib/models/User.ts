@@ -5,10 +5,35 @@ export interface IUser extends Document {
   email: string
   name: string
   avatar?: string
+  role: 'user' | 'admin'
+  lastLogin?: Date
   preferences: {
-    theme: 'light' | 'dark'
+    // General Settings
+    theme: 'light' | 'dark' | 'system'
+    accentColor: 'blue' | 'green' | 'purple'
+    fontSize: 'small' | 'medium' | 'large'
+    chatDensity: 'compact' | 'normal' | 'spacious'
     language: string
-    model: string
+    spokenLanguage: string
+    
+    // AI & Chat Settings
+    defaultModel: string
+    temperature: number
+    maxTokens: number
+    stream: boolean
+    systemPrompt?: string
+    
+    // Notifications
+    notifications: {
+      email: boolean
+      summary: boolean
+      inApp: boolean
+    }
+    
+    // Advanced Settings
+    betaFeatures: boolean
+    cacheEnabled: boolean
+    apiKey?: string
   }
   createdAt: Date
   updatedAt: Date
@@ -33,19 +58,99 @@ const UserSchema = new Schema<IUser>({
   avatar: {
     type: String
   },
+  role: {
+    type: String,
+    enum: ['user', 'admin'],
+    default: 'user'
+  },
+  lastLogin: {
+    type: Date
+  },
   preferences: {
+    // General Settings
     theme: {
       type: String,
-      enum: ['light', 'dark'],
-      default: 'dark'
+      enum: ['light', 'dark', 'system'],
+      default: 'system'
+    },
+    accentColor: {
+      type: String,
+      enum: ['blue', 'green', 'purple'],
+      default: 'blue'
+    },
+    fontSize: {
+      type: String,
+      enum: ['small', 'medium', 'large'],
+      default: 'medium'
+    },
+    chatDensity: {
+      type: String,
+      enum: ['compact', 'normal', 'spacious'],
+      default: 'normal'
     },
     language: {
       type: String,
       default: 'en'
     },
-    model: {
+    spokenLanguage: {
       type: String,
-      default: 'gpt-4-turbo-preview'
+      default: 'auto-detect'
+    },
+    
+    // AI & Chat Settings
+    defaultModel: {
+      type: String,
+      default: 'mistral'
+    },
+    temperature: {
+      type: Number,
+      default: 0.7,
+      min: 0,
+      max: 2
+    },
+    maxTokens: {
+      type: Number,
+      default: 1500,
+      min: 100,
+      max: 4000
+    },
+    stream: {
+      type: Boolean,
+      default: true
+    },
+    systemPrompt: {
+      type: String,
+      default: ''
+    },
+    
+    // Notifications
+    notifications: {
+      email: {
+        type: Boolean,
+        default: false
+      },
+      summary: {
+        type: Boolean,
+        default: false
+      },
+      inApp: {
+        type: Boolean,
+        default: true
+      }
+    },
+    
+    // Advanced Settings
+    betaFeatures: {
+      type: Boolean,
+      default: false
+    },
+    cacheEnabled: {
+      type: Boolean,
+      default: true
+    },
+    apiKey: {
+      type: String,
+      default: ''
     }
   }
 }, {
